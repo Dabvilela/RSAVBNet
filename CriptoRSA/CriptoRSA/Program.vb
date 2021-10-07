@@ -1,5 +1,6 @@
 Imports System
 Imports System.Numerics
+Imports System.Text
 
 Module Program
 
@@ -47,6 +48,7 @@ Module Program
     End Function
 
     Private Function CriptografarRSA(listaPalavra As List(Of Char)) As String
+
         Dim e As Integer = 13
         Dim Multiplicacaoprimos As Integer = 697
         Dim index = 0
@@ -59,11 +61,14 @@ Module Program
             index += 1
         End While
 
-        Return criptografado
+        Return Ofuscar(criptografado)
 
     End Function
 
     Private Function Descriptografar(criptografado As String) As String
+
+        criptografado = Desofuscar(criptografado)
+
         Dim e As Integer = 197
         Dim Multiplicacaoprimos As Integer = 697
         Dim index = 0
@@ -80,10 +85,55 @@ Module Program
 
     End Function
 
-    Private Function CriptoMaoUnica(PalavraListada As List(Of Char)) As String
+    Private Function Desofuscar(Ofuscado As String) As String
+
+        Dim desofuscadoListada As New List(Of Char)
+        Dim index As String = 0
+
+        Dim dictHexMeudesofuscar As New Dictionary(Of Char, Char)
+        dictHexMeudesofuscar.Add("A", "0")
+        dictHexMeudesofuscar.Add("3", "1")
+        dictHexMeudesofuscar.Add("Z", "2")
+        dictHexMeudesofuscar.Add("Y", "3")
+        dictHexMeudesofuscar.Add("9", "4")
+        dictHexMeudesofuscar.Add("B", "5")
+        dictHexMeudesofuscar.Add("X", "6")
+        dictHexMeudesofuscar.Add("*", "7")
+        dictHexMeudesofuscar.Add(".", "8")
+        dictHexMeudesofuscar.Add("?", "9")
+
+        For Each letra In Ofuscado
+            desofuscadoListada.Add(letra)
+        Next
+
+        If desofuscadoListada.Count <= 4 Then
+            Dim temp = desofuscadoListada(0)
+            desofuscadoListada(0) = desofuscadoListada(desofuscadoListada.Count - 1)
+            desofuscadoListada(desofuscadoListada.Count - 1) = temp
+        End If
+
+        If desofuscadoListada.Count > 4 Then
+            Dim temp = desofuscadoListada(Porcentagem(10, desofuscadoListada.Count))
+            desofuscadoListada(Porcentagem(10, desofuscadoListada.Count)) = desofuscadoListada(Porcentagem(33, desofuscadoListada.Count))
+            desofuscadoListada(Porcentagem(33, desofuscadoListada.Count)) = temp
+
+            Dim temp1 = desofuscadoListada(Porcentagem(50, desofuscadoListada.Count))
+            desofuscadoListada(Porcentagem(50, desofuscadoListada.Count)) = desofuscadoListada(Porcentagem(63, desofuscadoListada.Count))
+            desofuscadoListada(Porcentagem(63, desofuscadoListada.Count)) = temp1
+        End If
+
+        While index <= desofuscadoListada.Count - 1
+            desofuscadoListada(index) = dictHexMeudesofuscar(desofuscadoListada(index))
+            index += 1
+        End While
+
+        Return desofuscadoListada.ToArray
+
+    End Function
+
+    Private Function Ofuscar(criptografia As String) As String
 
         Dim CriptoListada As New List(Of Char)
-        Dim criptografado = CriptografarRSA(PalavraListada)
         Dim index As Integer = 0
 
         Dim dictHexMeu As New Dictionary(Of Char, Char)
@@ -98,7 +148,7 @@ Module Program
         dictHexMeu.Add("8", ".")
         dictHexMeu.Add("9", "?")
 
-        For Each numero In criptografado
+        For Each numero In criptografia
             CriptoListada.Add(numero)
         Next
 
@@ -124,6 +174,25 @@ Module Program
         End If
 
         Return CriptoListada.ToArray
+
+
+    End Function
+
+    Private Function CriptoMaoUnica(PalavraListada As List(Of Char)) As String
+
+        Dim e As Integer = 14
+        Dim Multiplicacaoprimos As Integer = 640
+        Dim index = 0
+        Dim criptografado As String = ""
+
+        While index <= PalavraListada.Count - 1
+            Dim numeroNaAsc = Asc(PalavraListada(index))
+
+            criptografado += ((Pow(numeroNaAsc, e)) Mod Multiplicacaoprimos).ToString
+            index += 1
+        End While
+
+        Return Ofuscar(criptografado)
 
     End Function
 
